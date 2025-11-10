@@ -87,13 +87,13 @@ if DATABASE_URL:
     DATABASES = {"default": env.db_url("DATABASE_URL")}
 else:
     DATABASES = {
-        "default": {
+            "default": {
             "ENGINE": "django.db.backends.postgresql",
-            "NAME": env("POSTGRES_DB", default="clientescrm"),
-            "USER": env("POSTGRES_USER", default="clientescrm"),
-            "PASSWORD": env("POSTGRES_PASSWORD", default="clientescrm"),
-            "HOST": env("POSTGRES_HOST", default="db"),
-            "PORT": env("POSTGRES_PORT", default="5432"),
+            "NAME": os.environ.get("POSTGRES_DB", "clientescrm"),
+            "USER": os.environ.get("POSTGRES_USER", "clientescrm"),
+            "PASSWORD": os.environ.get("POSTGRES_PASSWORD", "clientescrm"),
+            "HOST": os.environ.get("POSTGRES_HOST", "db" if not DEBUG else "localhost"),
+            "PORT": os.environ.get("POSTGRES_PORT", "5432"),
         }
     }
 
