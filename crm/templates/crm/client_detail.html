@@ -1,0 +1,75 @@
+{% extends "base.html" %}
+{% block title %}{{ client.name }} · clientesCRM{% endblock %}
+{% block content %}
+<div class="flex flex-col gap-6 md:flex-row md:items-start md:justify-between">
+    <div>
+        <h1 class="text-3xl font-semibold">{{ client.name }}</h1>
+        <p class="text-sm text-slate-400">Responsável: {{ client.owner.get_full_name|default:client.owner.username }}</p>
+        <div class="mt-4 grid grid-cols-1 gap-4 text-sm md:grid-cols-2">
+            <div class="rounded-lg border border-slate-800 bg-slate-900/40 p-4">
+                <h2 class="text-xs uppercase tracking-wide text-slate-400">Contato</h2>
+                <ul class="mt-3 space-y-2">
+                    <li>E-mail: <a href="mailto:{{ client.email }}" class="text-sky-400 hover:text-sky-300">{{ client.email|default:"—" }}</a></li>
+                    <li>Telefone: {{ client.phone|default:"—" }}</li>
+                    <li>Site: {% if client.website %}<a href="{{ client.website }}" class="text-sky-400 hover:text-sky-300" target="_blank" rel="noopener">{{ client.website }}</a>{% else %}—{% endif %}</li>
+                </ul>
+            </div>
+            <div class="rounded-lg border border-slate-800 bg-slate-900/40 p-4">
+                <h2 class="text-xs uppercase tracking-wide text-slate-400">Empresa</h2>
+                <ul class="mt-3 space-y-2">
+                    <li>Empresa: {{ client.company|default:"—" }}</li>
+                    <li>Segmento: {{ client.industry|default:"—" }}</li>
+                    <li>Notas: {{ client.notes|default:"Sem notas" }}</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    <a href="{% url 'crm:client-update' client.pk %}" class="self-start rounded-md border border-slate-700 px-4 py-2 text-sm hover:border-sky-500">Editar cliente</a>
+</div>
+<div class="mt-8 grid gap-6 md:grid-cols-2">
+    <section class="rounded-xl border border-slate-800 bg-slate-900/40 p-5">
+        <header class="flex items-center justify-between">
+            <h2 class="text-lg font-semibold">Pipeline</h2>
+            <a href="{% url 'crm:lead-create' %}?client={{ client.pk }}" class="text-sm text-sky-400 hover:text-sky-300">Adicionar lead</a>
+        </header>
+        <ul class="mt-4 space-y-3 text-sm">
+            {% for lead in client.leads.all %}
+            <li class="rounded-lg border border-slate-800 bg-slate-900/60 p-4">
+                <div class="flex items-center justify-between">
+                    <p class="font-semibold text-sky-300">{{ lead.get_status_display }}</p>
+                    <a href="{% url 'crm:lead-detail' lead.pk %}" class="text-xs uppercase tracking-wide text-slate-400 hover:text-sky-400">Detalhes</a>
+                </div>
+                <p class="mt-2 text-slate-300">Valor: R$ {{ lead.value|floatformat:2 }}</p>
+                <p class="text-slate-400">Assigned: {{ lead.assigned_to.get_full_name|default:lead.assigned_to.username|default:"Não atribuído" }}</p>
+            </li>
+            {% empty %}
+            <li class="text-sm text-slate-500">Nenhum lead associado.</li>
+            {% endfor %}
+        </ul>
+    </section>
+    <section class="rounded-xl border border-slate-800 bg-slate-900/40 p-5">
+        <header class="flex items-center justify-between">
+            <h2 class="text-lg font-semibold">Interações</h2>
+            <a href="{% url 'crm:interaction-create' client.pk %}" class="text-sm text-sky-400 hover:text-sky-300">Nova interação</a>
+        </header>
+        <ul class="mt-4 space-y-3 text-sm">
+            {% for interaction in client.interactions.all %}
+            <li class="rounded-lg border border-slate-800 bg-slate-900/60 p-4">
+                <div class="flex items-center justify-between text-xs uppercase tracking-wide text-slate-400">
+                    <span>{{ interaction.get_interaction_type_display }}</span>
+                    <span>{{ interaction.occurred_at|date:"d/m/Y H:i" }}</span>
+                </div>
+                <p class="mt-2 font-medium text-slate-200">{{ interaction.subject|default:"Sem assunto" }}</p>
+                <p class="mt-1 whitespace-pre-wrap text-slate-300">{{ interaction.notes }}</p>
+                {% if interaction.follow_up_date %}
+                    <p class="mt-2 text-xs text-amber-300">Follow-up em {{ interaction.follow_up_date|date:"d/m/Y" }}</p>
+                    <a href="{% url 'crm:interaction-complete' interaction.pk %}" class="mt-2 inline-flex items-center rounded-md border border-emerald-600 px-3 py-1 text-xs text-emerald-300 hover:bg-emerald-500/10">Marcar como concluído</a>
+                {% endif %}
+            </li>
+            {% empty %}
+            <li class="text-sm text-slate-500">Nenhuma interação registrada ainda.</li>
+            {% endfor %}
+        </ul>
+    </section>
+</div>
+{% endblock %}

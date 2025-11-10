@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+{% block title %}Leads · clientesCRM{% endblock %}
+{% block content %}
+<div class="flex items-center justify-between">
+    <div>
+        <h1 class="text-2xl font-semibold">Leads</h1>
+        <p class="text-sm text-slate-400">Acompanhe o pipeline de vendas.</p>
+    </div>
+    <a href="{% url 'crm:lead-create' %}" class="rounded-md bg-emerald-500 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-400">Novo lead</a>
+</div>
+<form method="get" class="mt-6 flex flex-wrap items-center gap-3 rounded-lg border border-slate-800 bg-slate-900/40 p-4">
+    <label class="text-sm text-slate-400">Status
+        <select name="status" class="ml-2 rounded-md border border-slate-700 bg-slate-900/80 px-3 py-1 text-sm">
+            <option value="">Todos</option>
+            {% for key, label in statuses %}
+                <option value="{{ key }}" {% if request.GET.status == key %}selected{% endif %}>{{ label }}</option>
+            {% endfor %}
+        </select>
+    </label>
+    <button type="submit" class="rounded-md border border-slate-700 px-4 py-2 text-sm hover:border-emerald-500">Aplicar</button>
+</form>
+<div class="mt-6 grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+    {% for lead in leads %}
+    <article class="rounded-xl border border-slate-800 bg-slate-900/50 p-5">
+        <div class="flex items-start justify-between">
+            <div>
+                <h2 class="text-lg font-semibold text-emerald-300">{{ lead.client.name }}</h2>
+                <p class="text-xs uppercase tracking-wide text-slate-400">{{ lead.get_status_display }}</p>
+            </div>
+            <a href="{% url 'crm:lead-detail' lead.pk %}" class="text-xs text-sky-400 hover:text-sky-300">Detalhes</a>
+        </div>
+        <dl class="mt-4 space-y-2 text-sm text-slate-300">
+            <div class="flex justify-between">
+                <dt>Valor</dt>
+                <dd>R$ {{ lead.value|floatformat:2 }}</dd>
+            </div>
+            <div class="flex justify-between">
+                <dt>Assigned</dt>
+                <dd>{{ lead.assigned_to.get_full_name|default:lead.assigned_to.username|default:"Não atribuído" }}</dd>
+            </div>
+            <div class="flex justify-between">
+                <dt>Interações</dt>
+                <dd>{{ lead.interaction_count }}</dd>
+            </div>
+        </dl>
+    </article>
+    {% empty %}
+    <p class="text-sm text-slate-500">Nenhum lead encontrado.</p>
+    {% endfor %}
+</div>
+{% endblock %}

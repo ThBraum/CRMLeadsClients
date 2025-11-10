@@ -1,0 +1,44 @@
+version: "3.9"
+
+services:
+  web:
+    build: .
+    command: ["sh", "./scripts/run.sh"]
+    ports:
+      - "8000:8000"
+    env_file:
+      - .env
+    depends_on:
+      - db
+    volumes:
+      - type: bind
+        source: .
+        target: /app
+    restart: unless-stopped
+
+  db:
+    image: postgres:15
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-clientescrm}
+      POSTGRES_USER: ${POSTGRES_USER:-clientescrm}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-clientescrm}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    restart: unless-stopped
+
+  tailwind:
+    image: node:20-alpine
+    working_dir: /app
+    command: sh -c "npm install && npx tailwindcss -i ./assets/css/app.css -o ./static/css/tailwind.css --watch"
+    volumes:
+      - type: bind
+        source: .
+        target: /app
+    environment:
+      - NODE_ENV=development
+    restart: unless-stopped
+
+volumes:
+  postgres_data:

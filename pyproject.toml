@@ -1,0 +1,53 @@
+[tool.poetry]
+name = "LeadsClientsCRM"
+version = "0.1.0"
+description = "Modern cloud-ready CRM for managing leads, clients, and interactions."
+authors = ["Matheus Braum <mtbraum@gmail.com>"]
+readme = "README.md"
+packages = [
+    { include = "core" },
+    { include = "crm" },
+    { include = "dashboard" }
+]
+
+[tool.poetry.dependencies]
+python = "^3.11"
+django = "^5.1"
+djangorestframework = "^3.15"
+django-environ = "^0.11"
+django-filter = "^24.3"
+django-storages = "^1.14"
+psycopg = { version = "^3.1", extras = ["binary"] }
+crispy-bootstrap5 = "^2024.2"
+django-crispy-forms = "^2.2"
+sentry-sdk = { version = "^2.14", extras = ["django"] }
+whitenoise = "^6.6"
+boto3 = "^1.35"
+gunicorn = "^23.0"
+
+[tool.poetry.group.dev.dependencies]
+black = "^24.8"
+ruff = "^0.6"
+pytest = "^8.3"
+pytest-django = "^4.8"
+django-debug-toolbar = "^4.4"
+model-bakery = "^1.18"
+
+[build-system]
+requires = ["poetry-core>=1.8.0"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.black]
+line-length = 100
+target-version = ["py311"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+
+[tool.pytest.ini_options]
+DJANGO_SETTINGS_MODULE = "core.settings"
+python_files = ["tests.py", "test_*.py"]
+
+[tool.poetry.scripts]
+crm-manage = "manage:main"

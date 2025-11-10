@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+{% block title %}Lead · {{ lead.client.name }}{% endblock %}
+{% block content %}
+<div class="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
+    <div>
+        <h1 class="text-2xl font-semibold">{{ lead.client.name }}</h1>
+        <p class="text-sm text-slate-400">Status atual: {{ lead.get_status_display }}</p>
+        <p class="mt-2 text-sm text-slate-300">Assigned: {{ lead.assigned_to.get_full_name|default:lead.assigned_to.username|default:"Não atribuído" }}</p>
+    </div>
+    <div class="flex gap-3">
+        <a href="{% url 'crm:lead-update' lead.pk %}" class="rounded-md border border-slate-700 px-4 py-2 text-sm hover:border-sky-500">Editar</a>
+        <form method="post" action="{% url 'crm:lead-stage' lead.pk %}" class="flex items-center gap-2">
+            {% csrf_token %}
+            <select name="status" class="rounded-md border border-slate-700 bg-slate-900/80 px-3 py-2 text-sm">
+                {% for key, label in lead._meta.get_field('status').choices %}
+                    <option value="{{ key }}" {% if lead.status == key %}selected{% endif %}>{{ label }}</option>
+                {% endfor %}
+            </select>
+            <button type="submit" class="rounded-md bg-emerald-500 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-400">Atualizar</button>
+        </form>
+    </div>
+</div>
+<div class="mt-6 grid gap-6 md:grid-cols-2">
+    <section class="rounded-xl border border-slate-800 bg-slate-900/40 p-5 text-sm">
+        <h2 class="text-lg font-semibold">Detalhes</h2>
+        <dl class="mt-4 space-y-2">
+            <div class="flex justify-between">
+                <dt>Valor</dt><dd>R$ {{ lead.value|floatformat:2 }}</dd>
+            </div>
+            <div class="flex justify-between">
+                <dt>Origem</dt><dd>{{ lead.source|default:"Não informada" }}</dd>
+            </div>
+            <div class="flex justify-between">
+                <dt>Previsto</dt><dd>{{ lead.expected_close_date|date:"d/m/Y"|default:"—" }}</dd>
+            </div>
+            <div class="flex justify-between">
+                <dt>Atualizado</dt><dd>{{ lead.updated_at|date:"d/m/Y H:i" }}</dd>
+            </div>
+        </dl>
+    </section>
+    <section class="rounded-xl border border-slate-800 bg-slate-900/40 p-5 text-sm">
+        <h2 class="text-lg font-semibold">Cliente</h2>
+        <p class="mt-3 text-slate-300">{{ lead.client.name }}</p>
+        <p class="text-slate-400">{{ lead.client.email|default:"—" }}</p>
+        <a href="{% url 'crm:client-detail' lead.client.pk %}" class="mt-3 inline-flex items-center text-sm text-sky-400 hover:text-sky-300">Ver cliente →</a>
+    </section>
+</div>
+{% endblock %}

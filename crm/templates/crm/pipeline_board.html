@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% block title %}Pipeline · clientesCRM{% endblock %}
+{% block content %}
+<h1 class="text-2xl font-semibold">Pipeline de vendas</h1>
+<p class="mt-1 text-sm text-slate-400">Arraste mentalmente seus cards — integrações de arrastar e soltar podem ser adicionadas depois.</p>
+<div class="mt-6 grid gap-4 md:grid-cols-4">
+    {% for column in columns %}
+    <section class="flex h-full flex-col rounded-xl border border-slate-800 bg-slate-900/40 p-4">
+        <header class="flex items-center justify-between">
+            <h2 class="text-sm font-semibold uppercase tracking-wide text-slate-300">{{ column.label }}</h2>
+            <span class="rounded-full bg-slate-800 px-2 py-0.5 text-xs text-slate-400">{{ column.leads|length }}</span>
+        </header>
+        <div class="mt-4 flex flex-1 flex-col gap-3">
+            {% for lead in column.leads %}
+            <article class="rounded-lg border border-slate-800 bg-slate-900/70 p-4 text-sm">
+                <h3 class="text-sky-300">{{ lead.client.name }}</h3>
+                <p class="text-xs text-slate-400">Valor estimado R$ {{ lead.value|floatformat:2 }}</p>
+                <a class="mt-2 inline-flex text-xs uppercase tracking-wide text-emerald-300 hover:text-emerald-200" href="{% url 'crm:lead-detail' lead.pk %}">Ver lead →</a>
+            </article>
+            {% empty %}
+            <p class="text-xs text-slate-500">Sem cards nesta coluna.</p>
+            {% endfor %}
+        </div>
+    </section>
+    {% endfor %}
+</div>
+{% endblock %}

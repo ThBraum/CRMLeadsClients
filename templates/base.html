@@ -1,0 +1,52 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="pt-BR" class="dark">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{% block title %}clientesCRM{% endblock %}</title>
+    <link rel="stylesheet" href="{% static 'css/tailwind.css' %}">
+    <script defer src="https://cdn.jsdelivr.net/npm/chart.js@4.4.6/dist/chart.umd.min.js"></script>
+    {% block extra_head %}{% endblock %}
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen">
+    <div class="min-h-screen flex flex-col">
+        <header class="border-b border-slate-800 bg-slate-900/80 backdrop-blur">
+            <nav class="mx-auto flex w-full max-w-7xl items-center justify-between px-6 py-4">
+                <a href="{% url 'dashboard:index' %}" class="text-xl font-semibold">clientesCRM</a>
+                <div class="flex items-center gap-4">
+                    <a href="{% url 'crm:client-list' %}" class="hover:text-sky-400 transition">Clientes</a>
+                    <a href="{% url 'crm:lead-list' %}" class="hover:text-sky-400 transition">Leads</a>
+                    <a href="{% url 'crm:pipeline' %}" class="hover:text-sky-400 transition">Pipeline</a>
+                    <button id="theme-toggle" class="rounded-full border border-slate-700 px-3 py-1 text-sm">Modo claro</button>
+                    {% if user.is_authenticated %}
+                        <form action="{% url 'logout' %}" method="post" class="inline">
+                            {% csrf_token %}
+                            <button type="submit" class="rounded-md bg-sky-500 px-4 py-2 text-sm font-semibold text-white shadow hover:bg-sky-400">Sair</button>
+                        </form>
+                    {% else %}
+                        <a href="{% url 'login' %}" class="rounded-md bg-sky-500 px-4 py-2 text-sm font-semibold text-white shadow hover:bg-sky-400">Entrar</a>
+                    {% endif %}
+                </div>
+            </nav>
+        </header>
+        <main class="flex-1">
+            {% if messages %}
+                <div class="mx-auto mt-4 w-full max-w-5xl space-y-2 px-6">
+                    {% for message in messages %}
+                        <div class="rounded-lg border border-sky-700 bg-sky-900/40 px-4 py-3 text-sm">{{ message }}</div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+            <section class="mx-auto w-full max-w-7xl px-6 py-10">
+                {% block content %}{% endblock %}
+            </section>
+        </main>
+        <footer class="border-t border-slate-800 bg-slate-900/50 py-4 text-center text-sm text-slate-400">
+            &copy; {% now "Y" %} clientesCRM — Powered by Django.
+        </footer>
+    </div>
+    <script src="{% static 'js/theme-toggle.js' %}"></script>
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

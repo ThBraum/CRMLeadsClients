@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% block title %}{% if form.instance.pk %}Editar cliente{% else %}Novo cliente{% endif %} · clientesCRM{% endblock %}
+{% block content %}
+<h1 class="text-2xl font-semibold">{% if form.instance.pk %}Editar cliente{% else %}Novo cliente{% endif %}</h1>
+<form method="post" class="mt-6 space-y-4 rounded-xl border border-slate-800 bg-slate-900/40 p-6">
+    {% csrf_token %}
+    {% for field in form %}
+        <div class="space-y-1">
+            <label class="block text-sm font-medium text-slate-300" for="{{ field.id_for_label }}">{{ field.label }}</label>
+            {{ field }}
+            {% if field.help_text %}
+                <p class="text-xs text-slate-500">{{ field.help_text }}</p>
+            {% endif %}
+            {% for error in field.errors %}
+                <p class="text-xs text-rose-400">{{ error }}</p>
+            {% endfor %}
+        </div>
+    {% endfor %}
+    <div class="flex items-center gap-3 pt-2">
+        <button type="submit" class="rounded-md bg-sky-500 px-4 py-2 text-sm font-semibold text-white hover:bg-sky-400">Salvar</button>
+        <a href="{% if form.instance.pk %}{% url 'crm:client-detail' form.instance.pk %}{% else %}{% url 'crm:client-list' %}{% endif %}" class="text-sm text-slate-400 hover:text-slate-200">Cancelar</a>
+    </div>
+</form>
+{% endblock %}

@@ -1,0 +1,103 @@
+{% extends "base.html" %}
+{% block title %}Dashboard · clientesCRM{% endblock %}
+{% block extra_head %}
+<style>
+.card-grid { display: grid; gap: 1.5rem; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); }
+</style>
+{% endblock %}
+{% block content %}
+<h1 class="text-2xl font-semibold">Olá, {{ user.first_name|default:user.username }}</h1>
+<p class="mt-1 text-sm text-slate-400">Resumo atualizado em {{ now|date:"d \d\e F \à\s H:i" }}</p>
+<div class="mt-6 card-grid">
+    <div class="rounded-xl border border-slate-800 bg-slate-900/40 p-5">
+        <p class="text-xs uppercase tracking-wide text-slate-400">Clientes ativos</p>
+        <p class="mt-3 text-3xl font-semibold">{{ clients_total }}</p>
+    </div>
+    <div class="rounded-xl border border-slate-800 bg-slate-900/40 p-5">
+        <p class="text-xs uppercase tracking-wide text-slate-400">Leads</p>
+        <p class="mt-3 text-3xl font-semibold">{{ leads_total }}</p>
+    </div>
+    <div class="rounded-xl border border-slate-800 bg-slate-900/40 p-5">
+        <p class="text-xs uppercase tracking-wide text-slate-400">Interações</p>
+        <p class="mt-3 text-3xl font-semibold">{{ interactions_total }}</p>
+    </div>
+    <div class="rounded-xl border border-slate-800 bg-slate-900/40 p-5">
+        <p class="text-xs uppercase tracking-wide text-slate-400">Taxa de conversão</p>
+        <p class="mt-3 text-3xl font-semibold">{{ conversion_rate }}%</p>
+    </div>
+</div>
+<div class="mt-10 grid gap-6 lg:grid-cols-2">
+    <section class="rounded-xl border border-slate-800 bg-slate-900/40 p-5">
+        <h2 class="text-lg font-semibold">Pipeline por status</h2>
+        <canvas id="pipelineChart" class="mt-4 h-64"></canvas>
+    </section>
+    <section class="rounded-xl border border-slate-800 bg-slate-900/40 p-5">
+        <h2 class="text-lg font-semibold">Vendas por vendedor</h2>
+        <canvas id="salesChart" class="mt-4 h-64"></canvas>
+    </section>
+</div>
+<section class="mt-10 rounded-xl border border-slate-800 bg-slate-900/40 p-5">
+    <h2 class="text-lg font-semibold">Últimas interações</h2>
+    <ul class="mt-4 divide-y divide-slate-800 text-sm">
+        {% for interaction in recent_interactions %}
+        <li class="py-3">
+            <div class="flex items-center justify-between">
+                <p class="font-medium text-slate-200">{{ interaction.client.name }}</p>
+                <span class="text-xs uppercase tracking-wide text-slate-400">{{ interaction.occurred_at|date:"d/m/Y H:i" }}</span>
+            </div>
+            <p class="text-xs text-slate-500">{{ interaction.get_interaction_type_display }} · {{ interaction.author.get_full_name|default:interaction.author.username|default:"—" }}</p>
+            <p class="mt-2 text-slate-300">{{ interaction.notes|truncatechars:140 }}</p>
+        </li>
+        {% empty %}
+        <li class="py-3 text-sm text-slate-500">Nenhuma interação registrada nos últimos dias.</li>
+        {% endfor %}
+    </ul>
+</section>
+{% endblock %}
+{% block extra_js %}
+{{ pipeline_labels|json_script:"pipeline-labels" }}
+{{ pipeline_totals|json_script:"pipeline-totals" }}
+{{ sales_labels|json_script:"sales-labels" }}
+{{ sales_totals|json_script:"sales-totals" }}
+<script>
+const pipelineCtx = document.getElementById("pipelineChart");
+if (pipelineCtx) {
+    const pipelineLabels = JSON.parse(document.getElementById("pipeline-labels").textContent);
+    const pipelineTotals = JSON.parse(document.getElementById("pipeline-totals").textContent);
+    new Chart(pipelineCtx, {
+        type: "doughnut",
+        data: {
+            labels: pipelineLabels,
+            datasets: [{
+                data: pipelineTotals,
+                backgroundColor: ["#38bdf8", "#22c55e", "#f97316", "#6366f1", "#ec4899"],
+            }],
+        },
+        options: { plugins: { legend: { labels: { color: "#cbd5f5" } } } }
+    });
+}
+const salesCtx = document.getElementById("salesChart");
+if (salesCtx) {
+    const salesLabels = JSON.parse(document.getElementById("sales-labels").textContent);
+    const salesTotals = JSON.parse(document.getElementById("sales-totals").textContent);
+    new Chart(salesCtx, {
+        type: "bar",
+        data: {
+            labels: salesLabels,
+            datasets: [{
+                label: "Vendas",
+                data: salesTotals,
+                backgroundColor: "#22c55e",
+            }],
+        },
+        options: {
+            scales: {
+                x: { ticks: { color: "#cbd5f5" } },
+                y: { ticks: { color: "#cbd5f5" } },
+            },
+            plugins: { legend: { labels: { color: "#cbd5f5" } } },
+        }
+    });
+}
+</script>
+{% endblock %}
